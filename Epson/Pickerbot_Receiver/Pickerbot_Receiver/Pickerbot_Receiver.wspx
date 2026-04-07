@@ -3,9 +3,9 @@
   "program_files": [
     {
       "name": "Main.prg",
-      "hash_code": "F6-AA-7B-3C-67-86-97-83-4F-D3-D4-20-F5-25-86-BB-0B-44-49-73-A4-A0-33-D5-59-77-6A-14-14-85-79-52",
+      "hash_code": "A3-5C-BE-97-4B-AC-09-D2-B3-2A-0A-63-F5-35-16-C7-E7-7B-FF-DC-0F-2A-EB-26-E5-FF-A8-31-9E-49-E0-9E",
       "break_points": [],
-      "editor_view_state": "\"{\\\"cursorState\\\":[{\\\"inSelectionMode\\\":false,\\\"selectionStart\\\":{\\\"lineNumber\\\":9,\\\"column\\\":10},\\\"position\\\":{\\\"lineNumber\\\":9,\\\"column\\\":10}}],\\\"viewState\\\":{\\\"scrollLeft\\\":0,\\\"firstPosition\\\":{\\\"lineNumber\\\":5,\\\"column\\\":1},\\\"firstPositionDeltaTop\\\":-4},\\\"contributionsState\\\":{\\\"editor.contrib.folding\\\":{\\\"lineCount\\\":80,\\\"provider\\\":\\\"syntax\\\"}}}\""
+      "editor_view_state": "\"{\\\"cursorState\\\":[{\\\"inSelectionMode\\\":false,\\\"selectionStart\\\":{\\\"lineNumber\\\":17,\\\"column\\\":2},\\\"position\\\":{\\\"lineNumber\\\":17,\\\"column\\\":2}}],\\\"viewState\\\":{\\\"scrollLeft\\\":0,\\\"firstPosition\\\":{\\\"lineNumber\\\":1,\\\"column\\\":1},\\\"firstPositionDeltaTop\\\":2},\\\"contributionsState\\\":{\\\"editor.contrib.folding\\\":{\\\"lineCount\\\":112,\\\"provider\\\":\\\"syntax\\\"}}}\""
     }
   ],
   "force_guide_files": [],
@@ -47,7 +47,7 @@
     "num_of_displays": 1,
     "displays": [],
     "display_vision": false,
-    "splitter_distance": 0.0
+    "splitter_distance": 248.0
   },
   "force_guide": {
     "show_flow_chart": true,
