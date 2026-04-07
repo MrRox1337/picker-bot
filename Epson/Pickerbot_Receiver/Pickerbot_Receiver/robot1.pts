@@ -1,0 +1,55 @@
+ENVT0100,LM:2026/04/07 09:24:58:040,DS:0000000734,CS:02052,MA:8C-B8-7E-B4-9C-8A,EI:           
+sVersion="2.0.0"
+nNumberOfPoints=2
+Point1 {
+	nNumber=1
+	sLabel="PlacePoint"
+	sDescription=""
+	nUndefined=0
+	rX=0
+	rY=750
+	rZ=359.99963378906
+	rU=90
+	rV=0
+	rW=-179.99992370605
+	rR=0
+	rS=0
+	rT=0
+	nLocal=0
+	nHand=1
+	nElbow=1
+	nWrist=1
+	nJ1Flag=0
+	nJ2Flag=0
+	nJ4Flag=0
+	nJ6Flag=0
+	rJ1Angle=0
+	rJ4Angle=0
+	bSimVisible=False
+}
+Point2 {
+	nNumber=2
+	sLabel="HomePoint"
+	sDescription=""
+	nUndefined=448
+	rX=0
+	rY=350
+	rZ=410
+	rU=90
+	rV=0
+	rW=-180
+	rR=0
+	rS=0
+	rT=0
+	nLocal=0
+	nHand=1
+	nElbow=1
+	nWrist=1
+	nJ1Flag=0
+	nJ2Flag=0
+	nJ4Flag=0
+	nJ6Flag=0
+	rJ1Angle=0
+	rJ4Angle=0
+	bSimVisible=False
+}

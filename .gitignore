@@ -205,3 +205,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# EPSON
+Epson/Pickerbot_Receiver/Pickerbot_Receiver/*.bak
+Epson/Pickerbot_Receiver/Pickerbot_Receiver/*.lock
