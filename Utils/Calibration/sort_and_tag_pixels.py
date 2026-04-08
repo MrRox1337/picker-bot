@@ -43,12 +43,12 @@ def main():
     # 1. Sort all points purely by X to broadly order them left-to-right
     points_by_x = sorted(points, key=lambda p: p[0])
     
-    # 2. Define the real-world coordinates mapping
-    # 11 columns, step size 2, from +10 down to -10
-    world_x_vals = [10, 8, 6, 4, 2, 0, -2, -4, -6, -8, -10]
+    # 2. Define the real-world coordinates mapping (Corrected to Millimeters)
+    # 11 columns, step size 20mm, from +100 down to -100
+    world_x_vals = [100, 80, 60, 40, 20, 0, -20, -40, -60, -80, -100]
     
-    # 7 rows, step size 2, from 464 up to 476
-    world_y_vals = [464, 466, 468, 470, 472, 474, 476]
+    # 7 rows, step size 20mm, from 410 up to 530
+    world_y_vals = [410, 430, 450, 470, 490, 510, 530]
     
     # 3. Group into columns of 7, sort strictly by Y, and map world coordinates
     sorted_points_with_world = []
@@ -83,7 +83,7 @@ def main():
         writer.writerow(['Pixel_X', 'Pixel_Y', 'World_X', 'World_Y'])
         writer.writerows(sorted_points_with_world)
         
-    print(f"\nSuccess! {len(sorted_points_with_world)} points have been mapped and saved.")
+    print(f"\nSuccess! {len(sorted_points_with_world)} points have been mapped and saved in mm.")
 
 if __name__ == "__main__":
     main()
