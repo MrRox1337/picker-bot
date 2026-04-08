@@ -65,7 +65,7 @@ Function main
 			Print #201, "OK"
 		EndIf
 	
-		' if the command is pick x y z v
+		' if the command is pick x y z u
 		If LCase$(indata$(0)) = "pick" Then
 			x = Val(Trim$(indata$(1)))
 			y = Val(Trim$(indata$(2)))
@@ -80,7 +80,7 @@ Function main
 			Off 11
 			Wait 0.5
 			TMove XY(0, 0, -50, 0, 0, 0)
-			Home
+			Go HomePoint
 			Print #201, "OK"
 		EndIf
 	

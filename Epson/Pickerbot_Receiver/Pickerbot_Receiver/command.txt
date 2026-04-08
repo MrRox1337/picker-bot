@@ -1,1 +1,14 @@
-
+> Hone
+!!Error: 3100, Syntax error.
+> Home
+> Go
+!!Error: 3205, Point is not specified.
+> Go Here +X(10)
+> 
+> Home
+> 
+> 
+> 
+> Go HomePoint
+> 
+> 
