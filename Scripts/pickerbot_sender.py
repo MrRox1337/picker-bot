@@ -18,10 +18,9 @@ clientSocket.connect((ip_adddress,2001))
 # example:
 # places = ["100 400 600 0", "0 500 500 0", "-100 600 400 0"]
 
-robot_z = 360 # default z height for picking, can be changed based on the object height
 
 
-def epsonGo(x = 0, y = 450, robot_z = robot_z, robot_u = 0):
+def epsonGo(x = 0, y = 470, robot_z = 360, robot_u = 0):
     coordinates = "GO " + f"{x} {y} {robot_z} {robot_u}" + "\r\n"
     print (f"Going to position {x}, {y}, {robot_z}, {robot_u}")
     clientSocket.send(coordinates.encode())
@@ -29,7 +28,7 @@ def epsonGo(x = 0, y = 450, robot_z = robot_z, robot_u = 0):
     print("result:", confirmation)
     sleep(1)
 
-def epsonJump(x = 0, y = 450, robot_z = robot_z, robot_u = 0):
+def epsonJump(x = 0, y = 470, robot_z = 360, robot_u = 0):
     coordinates = "JUMP " + f"{x} {y} {robot_z} {robot_u}" + "\r\n"
     print (f"Jumping to position {x}, {y}, {robot_z}, {robot_u}")
     clientSocket.send(coordinates.encode())
@@ -37,7 +36,15 @@ def epsonJump(x = 0, y = 450, robot_z = robot_z, robot_u = 0):
     print("result:", confirmation)
     sleep(1)
 
-def epsonPick(x = 0, y = 450, robot_z = robot_z, robot_u = 0):
+def epsonMove(sock, x, y, robot_z):
+    coordinates = "MOVE " + f"{x} {y} {robot_z}" + "\r\n"
+    print(f"--> Sending: Moving to World Position X={x}, Y={y}, Z={robot_z}")
+    sock.send(coordinates.encode())
+    confirmation = sock.recv(1023)
+    print("--> EPSON Reply:", confirmation.decode().strip())
+    sleep(0.5)
+
+def epsonPick(x = 0, y = 470, robot_z = 360, robot_u = 0):
     coordinates = "PICK " + f"{x} {y} {robot_z} {robot_u}" + "\r\n"
     print (f"Picking at position {x}, {y}, {robot_z}, {robot_u}")
     clientSocket.send(coordinates.encode())

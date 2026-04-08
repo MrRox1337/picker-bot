@@ -1,8 +1,8 @@
-ENVT0100,LM:2026/04/08 10:44:33:861,DS:0000007319,CS:19718,MA:8C-B8-7E-B4-9C-8A,EI:           
+ENVT0100,LM:2026/04/08 11:19:34:897,DS:0000007318,CS:23661,MA:8C-B8-7E-B4-9C-8A,EI:           
 SystemProperties {
 	sRCVersion="8.0.0"
 	sRCRevision=""
-	bBuildComplete=False
+	bBuildComplete=True
 	bFirstBuildComplete=True
 	bRebuildRequired=False
 	bClearControllerProject=False
@@ -10,8 +10,8 @@ SystemProperties {
 	sGUID="044c4efe-805a-45b5-9715-973533620e09"
 	sPath="C:\\Users\\amanr\\Documents\\MDX Courses\\PDE4435\\Coursework 2\\picker-bot\\Epson\\Pickerbot_Receiver\\Pickerbot_Receiver"
 	sCreated="4/6/2026 4:47:32 PM"
-	sLastModified="4/8/2026 2:44:33 PM"
-	sLastSyncDate="4/8/2026 12:15:57 PM"
+	sLastModified="4/8/2026 3:07:37 PM"
+	sLastSyncDate="4/8/2026 3:07:37 PM"
 }
 UserProperties {
 	sVersion=""
@@ -35,7 +35,7 @@ ProgramFile1 {
 	sName="Main.prg"
 	bCompiled=True
 	bStoreInController=True
-	sTimeSavedInController="4/7/2026 5:13:51 PM"
+	sTimeSavedInController="4/8/2026 10:58:43 AM"
 }
 nIncludeFileCount=0
 nPointFileCount=1
