@@ -1,7 +1,7 @@
 'Epson RC8 program to listed to command sent over TCP/IP network
 'Valid commands are JUMP and GO, each command shall be followed by x, y, z, u, v
 
-Global Integer x, y, z, u
+Global Double x, y, z, u
 
 Function main
 	String indata$(0), receive$
