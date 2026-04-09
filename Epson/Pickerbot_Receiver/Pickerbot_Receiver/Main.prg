@@ -80,6 +80,11 @@ Function main
 			Off 11
 			Wait 0.5
 			TMove XY(0, 0, -50, 0, 0, 0)
+			Print #201, "OK"
+		EndIf
+		
+		' if the command is standby
+		If LCase$(indata$(0)) = "standby" Then
 			Go HomePoint
 			Print #201, "OK"
 		EndIf
