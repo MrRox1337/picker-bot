@@ -3,10 +3,8 @@ import sys
 import numpy as np
 import cv2
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # Suppress annoying TensorFlow warnings
-os.environ['TF_USE_LEGACY_KERAS'] = '1' # Force TensorFlow 2.16+ to use Keras 2 engine for Teachable Machine compatibility
 
-# VERY IMPORTANT: These must be imported AFTER setting TF_USE_LEGACY_KERAS
-from tensorflow.keras.models import load_model
+from tf_keras.models import load_model
 
 class ModuleClassifier:
     def __init__(self, model_dir):
