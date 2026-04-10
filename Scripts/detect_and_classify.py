@@ -95,13 +95,13 @@ def process_image(image_path, classifier):
     boxes, _ = detect_objects(frame, DEFAULT_THRESH_VALUE)
     annotated, results = classify_and_annotate(frame, boxes, classifier)
 
-    locations = [f"{cx} {cy} {angle:.1f}" for (x, y, w, h, cx, cy, angle, label, conf) in results]
-    print(locations)
+    locations = [f"{cx} {cy} {angle:.1f}" for (_, _, _, _, cx, cy, angle, _, _) in results]
 
     cv2.imshow("Detected Objects", annotated)
-    print("\nPress any key to close.")
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+    return locations
 
 
 def process_camera(classifier):
@@ -124,7 +124,8 @@ def process_camera(classifier):
 
         thresh_val = cv2.getTrackbarPos("Thresh", "Detect & Classify")
         boxes, thresh_view = detect_objects(frame, thresh_val)
-        annotated, _ = classify_and_annotate(frame, boxes, classifier)
+        annotated, results = classify_and_annotate(frame, boxes, classifier)
+        locations = [f"{cx} {cy} {angle:.1f}" for (_, _, _, _, cx, cy, angle, _, _) in results]
 
         cv2.imshow("Detect & Classify", annotated)
         cv2.imshow("Threshold", thresh_view)
@@ -134,6 +135,8 @@ def process_camera(classifier):
 
     cap.release()
     cv2.destroyAllWindows()
+
+    return locations
 
 
 def main():
@@ -146,10 +149,13 @@ def main():
     print("Model warmed up and ready.\n")
 
     if len(sys.argv) > 1:
-        process_image(sys.argv[1], classifier)
+        locations =process_image(sys.argv[1], classifier)
     else:
-        process_camera(classifier)
+        locations =process_camera(classifier)
 
+    print("\nDetected Locations (Centroid X, Centroid Y, Angle):")
+    for loc in locations:
+        print(loc)
 
 if __name__ == "__main__":
     main()
