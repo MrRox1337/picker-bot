@@ -29,7 +29,7 @@ def detect_objects(frame, thresh_val):
         area = cv2.contourArea(contour)
         if MIN_CONTOUR_AREA < area < MAX_CONTOUR_AREA:
             x, y, w, h = cv2.boundingRect(contour)
-            boxes.append((x, y, w, h))
+            boxes.append((x, y, w, h, contour))
     return boxes, thresh
 
 
@@ -37,14 +37,14 @@ def classify_and_annotate(frame, boxes, classifier):
     """Crop each bounding box, classify it, and draw the label on the frame."""
     results = []
     frame_h, frame_w = frame.shape[:2]
-    for (x, y, w, h) in boxes:
+    for (x, y, w, h, contour) in boxes:
         # Place the crop onto a white canvas at original pixel size so the
         # classifier sees it the same way as the training images — no upscaling blur
         crop = frame[y:y+h, x:x+w]
         canvas = np.full((frame_h, frame_w, 3), 255, dtype=np.uint8)
-        cx, cy = frame_w // 2, frame_h // 2
-        paste_x = cx - w // 2
-        paste_y = cy - h // 2
+        canvas_cx, canvas_cy = frame_w // 2, frame_h // 2
+        paste_x = canvas_cx - w // 2
+        paste_y = canvas_cy - h // 2
         canvas[paste_y:paste_y+h, paste_x:paste_x+w] = crop
         label, confidence = classifier.predict(canvas)
 
@@ -52,16 +52,35 @@ def classify_and_annotate(frame, boxes, classifier):
         if label == "empty" or confidence < CONFIDENCE_THRESHOLD:
             continue
 
-        results.append((x, y, w, h, label, confidence))
+        # Centroid of the bounding box
+        centroid_x = x + w // 2
+        centroid_y = y + h // 2
 
-        # Draw green bounding box
+        # Orientation angle from the minimum area rotated rectangle
+        rect = cv2.minAreaRect(contour)
+        (_, _), (rect_w, rect_h), angle = rect
+        # Normalize so angle is relative to horizontal X axis [0, 180)
+        if rect_w < rect_h:
+            angle = angle + 90
+
+        results.append((x, y, w, h, centroid_x, centroid_y, angle, label, confidence))
+
+        # Draw green upright bounding box
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 1)
 
-        # Draw label background for readability
-        text = f"{label} {confidence*100:.1f}%"
-        (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+        # Draw red rotated bounding box aligned with item orientation
+        rot_box = cv2.boxPoints(rect)
+        rot_box = np.int32(rot_box)
+        cv2.drawContours(frame, [rot_box], 0, (0, 0, 255), 2)
+
+        # Draw centroid dot
+        cv2.circle(frame, (centroid_x, centroid_y), 4, (0, 0, 255), -1)
+
+        # Draw label with centroid and angle
+        text = f"{label} {confidence*100:.1f}% ({centroid_x},{centroid_y}) {angle:.1f} deg"
+        (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.3, 1)
         cv2.rectangle(frame, (x, y - th - 8), (x + tw + 4, y), (0, 255, 0), -1)
-        cv2.putText(frame, text, (x + 2, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
+        cv2.putText(frame, text, (x + 2, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 0, 0), 1)
 
     return frame, results
 
@@ -76,9 +95,8 @@ def process_image(image_path, classifier):
     boxes, _ = detect_objects(frame, DEFAULT_THRESH_VALUE)
     annotated, results = classify_and_annotate(frame, boxes, classifier)
 
-    print(f"\nDetected {len(results)} object(s):")
-    for (x, y, w, h, label, conf) in results:
-        print(f"  - {label} ({conf*100:.1f}%) at ({x}, {y}, {w}x{h})")
+    locations = [f"{cx} {cy} {angle:.1f}" for (x, y, w, h, cx, cy, angle, label, conf) in results]
+    print(locations)
 
     cv2.imshow("Detected Objects", annotated)
     print("\nPress any key to close.")
