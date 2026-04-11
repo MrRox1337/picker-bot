@@ -1,11 +1,24 @@
 import socket
 from time import sleep
 
-# ip_adddress = "192.168.150.2" # real robot
-ip_adddress = "127.0.0.1" # simulator robot
+clientSocket = None
 
-clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-clientSocket.connect((ip_adddress, 2001))
+def connect(ip="127.0.0.1", port=2001):
+    """Connect to the EPSON robot controller. Call before using any command functions."""
+    global clientSocket
+    # ip = "192.168.150.2" # real robot
+    print(f"Connecting to EPSON at {ip}:{port}...")
+    clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    clientSocket.connect((ip, port))
+    print("Connected.")
+
+def disconnect():
+    """Close the TCP/IP connection to the EPSON robot controller."""
+    global clientSocket
+    if clientSocket:
+        clientSocket.close()
+        clientSocket = None
+        print("Disconnected.")
 
 def _send_command(command, x, y, z, u=0):
     """Centralized helper to format and send TCP/IP commands to EPSON."""
@@ -54,6 +67,8 @@ def epsonPickAll(locations):
     print("Going to standby position...")
     epsonStandby() # Move to standby position
 
-# Example usage (Uncomment to test):
-target_locations = [[0, 470, 360, 25], [50, 470, 360, 0]]
-epsonPickAll(target_locations)
+if __name__ == "__main__":
+    connect()
+    # Example usage:
+    target_locations = [[0, 470, 360, 25], [50, 470, 360, 0]]
+    epsonPickAll(target_locations)

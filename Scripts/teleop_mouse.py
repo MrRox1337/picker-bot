@@ -1,10 +1,9 @@
-import socket
-from time import sleep
 import numpy as np
 import cv2
 import csv
 import os
 import sys
+from pickerbot_sender import connect, disconnect, epsonMove
 
 # --- 1. EPSON TCP/IP SETTINGS ---
 ip_adddress = "127.0.0.1" # simulator robot
@@ -41,38 +40,21 @@ def pixel_to_world(H, pixel_x, pixel_y):
     world_point = cv2.perspectiveTransform(point, H)
     return round(world_point[0][0][0], 3), round(world_point[0][0][1], 3)
 
-# --- 3. EPSON COMMAND FUNCTIONS ---
-def epsonPick(sock, x, y, robot_z, robot_u=0):
-    coordinates = "PICK " + f"{x} {y} {robot_z} {robot_u}" + "\r\n"
-    print(f"--> Sending: Picking at World Position X={x}, Y={y}, Z={robot_z}, U={robot_u}")
-    sock.send(coordinates.encode())
-    confirmation = sock.recv(1023)
-    print("--> EPSON Reply:", confirmation.decode().strip())
-    sleep(1)
-
-def epsonMove(sock, x, y, robot_z):
-    coordinates = "MOVE " + f"{x} {y} {robot_z}" + "\r\n"
-    print(f"--> Sending: Moving to World Position X={x}, Y={y}, Z={robot_z}")
-    sock.send(coordinates.encode())
-    confirmation = sock.recv(1023)
-    print("--> EPSON Reply:", confirmation.decode().strip())
-    sleep(0.5)
-
 def mouse_click(event, x, y, flags, param):
     """Callback function for mouse clicks on the OpenCV window."""
     if event == cv2.EVENT_LBUTTONDOWN:
-        H_matrix, sock, z_height, img_display = param
-        
+        H_matrix, z_height, img_display = param
+
         # Translate pixel to world coordinates
         world_x, world_y = pixel_to_world(H_matrix, x, y)
         print(f"\nTarget Selected - Pixel: ({x}, {y}) | EPSON World: X={world_x}, Y={world_y}")
-        
+
         # Draw a visual marker for the click (blue circle)
         cv2.circle(img_display, (x, y), radius=5, color=(255, 0, 0), thickness=-1)
         cv2.imshow("Interactive PickerBot (Click to Move, 'q' to quit)", img_display)
-        
+
         # Send MOVE command
-        epsonMove(sock, world_x, world_y, z_height)
+        epsonMove(world_x, world_y, z_height)
 
 def main():
     # Load calibration matrix
@@ -87,10 +69,8 @@ def main():
     H_matrix = calculate_homography(src_pts, dst_pts)
     
     # Connect to Robot
-    print(f"\n2. Connecting to EPSON simulator at {ip_adddress}:{port}...")
     try:
-        clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        clientSocket.connect((ip_adddress, port))
+        connect(ip_adddress, port)
     except Exception as e:
         print(f"Connection failed: {e}")
         sys.exit(1)
@@ -118,9 +98,8 @@ def main():
     window_name = "Interactive PickerBot (Click to Move, 'q' to quit)"
     
     cv2.namedWindow(window_name)
-    # Pass the matrix, socket, and image as parameters to the callback
-    cv2.setMouseCallback(window_name, mouse_click, param=(H_matrix, clientSocket, robot_z, img_display))
-    
+    cv2.setMouseCallback(window_name, mouse_click, param=(H_matrix, robot_z, img_display))
+
     cv2.imshow(window_name, img_display)
     print("Click anywhere on the image to send the robot to that location.")
     print("Press 'q' on your keyboard to quit.")
@@ -131,7 +110,7 @@ def main():
             break
 
     print("\nClosing connection.")
-    clientSocket.close()
+    disconnect()
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
