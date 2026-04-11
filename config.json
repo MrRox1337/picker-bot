@@ -1,0 +1,11 @@
+{
+    "input_mode": "image",
+    "webcam_id": 1,
+    "test_image_path": "test-dataset/test-samples/14.jpg",
+    "cv_threshold": 104,
+    "min_confidence": 0.70,
+    "fixed_crop_size": 160,
+    "enable_epson_tcp": false,
+    "epson_ip": "127.0.0.1",
+    "epson_port": 2001
+}
