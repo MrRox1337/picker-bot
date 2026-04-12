@@ -1,4 +1,4 @@
-ENVT0100,LM:2026/04/12 10:51:05:733,DS:0000007321,CS:04878,MA:8C-B8-7E-B4-9C-8A,EI:           
+ENVT0100,LM:2026/04/12 13:53:56:474,DS:0000007307,CS:13604,MA:8C-B8-7E-B4-9C-8A,EI:           
 SystemProperties {
 	sRCVersion="8.0.0"
 	sRCRevision=""
@@ -10,8 +10,8 @@ SystemProperties {
 	sGUID="044c4efe-805a-45b5-9715-973533620e09"
 	sPath="C:\\Users\\amanr\\Documents\\MDX Courses\\PDE4435\\Coursework 2\\picker-bot\\Epson\\Pickerbot_Receiver\\Pickerbot_Receiver"
 	sCreated="4/6/2026 4:47:32 PM"
-	sLastModified="4/12/2026 2:51:05 PM"
-	sLastSyncDate="4/12/2026 2:51:05 PM"
+	sLastModified="4/12/2026 5:53:56 PM"
+	sLastSyncDate="4/12/2026 5:53:56 PM"
 }
 UserProperties {
 	sVersion=""
@@ -35,7 +35,7 @@ ProgramFile1 {
 	sName="Main.prg"
 	bCompiled=True
 	bStoreInController=True
-	sTimeSavedInController="4/12/2026 10:51:01 AM"
+	sTimeSavedInController="4/12/2026 11:19:00 AM"
 }
 nIncludeFileCount=0
 nPointFileCount=1
@@ -412,11 +412,11 @@ FGFile1 {
 }
 bFGCompiled=False
 Simulator {
-	sSimProjFile="C:\\ProgramData\\EpsonRC80\\Simulator\\Week3InClassTest\\SimObjects.dat"
+	sSimProjFile="C:\\ProgramData\\EpsonRC80\\Simulator\\VT6-A901S\\SimObjects.dat"
 }
 nPFFileCount=0
 ControllerConnection {
-	sName="Week3InClassTest"
+	sName="VT6-A901S"
 	sType="Virtual"
 	sIPAddress="127.0.0.1"
 	nPort=-1

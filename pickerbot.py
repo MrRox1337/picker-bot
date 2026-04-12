@@ -3,16 +3,15 @@ import sys
 import json
 import argparse
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, script_dir)
+project_root = os.path.dirname(os.path.abspath(__file__))
 
-from detect_and_classify import detect_and_annotate, DEFAULT_CONFIDENCE
-from teleop_mouse import load_calibration_data, calculate_homography, pixel_to_world, run_calibration_gui
-from pickerbot_sender import connect, disconnect, epsonPickAll
+from pickerbot_lib.detection import detect_and_annotate, DEFAULT_CONFIDENCE
+from pickerbot_lib.calibration import load_calibration_data, calculate_homography, pixel_to_world, run_calibration_gui
+from pickerbot_lib.sender import connect, disconnect, epsonPickAll
 import cv2
 
 # ── Load configuration from config.json ───────────────────────
-config_path = os.path.join(script_dir, "..", "config.json")
+config_path = os.path.join(project_root, "config.json")
 with open(config_path, "r") as f:
     config = json.load(f)
 
@@ -89,8 +88,8 @@ def main():
         return
 
     # 1. Load homography calibration (use config override if available, else default)
-    default_csv = os.path.join(script_dir, "..", "Utils", "Calibration", "calibration_pixels.csv")
-    csv_file = os.path.join(script_dir, "..", config.get("calibration_file", "")) if config.get("calibration_file") else default_csv
+    default_csv = os.path.join(project_root, "data", "calibration", "calibration_pixels.csv")
+    csv_file = os.path.join(project_root, config.get("calibration_file", "")) if config.get("calibration_file") else default_csv
     src_pts, dst_pts = load_calibration_data(csv_file)
     H = calculate_homography(src_pts, dst_pts)
     print(f"Homography calibration loaded from {os.path.basename(csv_file)}.\n")

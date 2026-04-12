@@ -63,7 +63,7 @@ def main():
     print("-> YOLO OBB Core initialized.")
 
     # 3. LOAD HOMOGRAPHY MATRIX
-    csv_file = os.path.join(script_dir, "..", "Utils", "Calibration", "calibration_pixels.csv")
+    csv_file = os.path.join(script_dir, "..", "data", "calibration", "calibration_pixels.csv")
     src_pts, dst_pts = load_calibration_data(csv_file)
     H_matrix, _ = cv2.findHomography(src_pts, dst_pts, 0)
     print("-> Spatial Homography mapped.")
