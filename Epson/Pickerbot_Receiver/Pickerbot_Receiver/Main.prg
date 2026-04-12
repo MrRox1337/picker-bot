@@ -79,12 +79,12 @@ Function main
 			Jump3 Here +Z(50), PlacePoint +Z(50), PlacePoint
 			Off 11
 			Wait 0.5
-			TMove XY(0, 0, -50, 0, 0, 0)
 			Print #201, "OK"
 		EndIf
 		
 		' if the command is standby
 		If LCase$(indata$(0)) = "standby" Then
+			TMove XY(0, 0, -50, 0, 0, 0)
 			Go HomePoint
 			Print #201, "OK"
 		EndIf
