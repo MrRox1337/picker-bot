@@ -1,0 +1,8 @@
+If you have purchased or are planning to purchase the VT6L robot on/after 1/1/2021 please use the Rev B model.
+
+Rev B serial number designation:
+VT6-A901S: VT60*3**** and later
+VT6-A901C: VT6301**** and later
+VT6-A901P: VT6401**** and later
+
+*If you have any questions, contact the Applications Department: applications@robots.epson.com
