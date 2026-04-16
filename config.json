@@ -1,7 +1,7 @@
 {
-  "input_mode": "image",
+  "input_mode": "webcam",
   "webcam_id": 1,
-  "test_image_path": "data/test-samples/31.jpg",
+  "test_image_path": "data/test-samples/14.jpg",
   "min_confidence": 0.65,
   "enable_epson_tcp": false,
   "epson_ip": "127.0.0.1",

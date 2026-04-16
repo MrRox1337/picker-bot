@@ -21,12 +21,55 @@ def translate_points(pixel_locations, H):
     for loc in pixel_locations:
         px, py, angle = loc.split()
         wx, wy = pixel_to_world(H, float(px), float(py))
-        world_locations.append(f"{wx} {wy} {config["robot_z"]} {angle}")
+        world_locations.append(f"{wx} {wy} {config['robot_z']} {angle}")
     return world_locations
+
+def load_boq():
+    """Reads boq.txt and limits the robot payload to requested kit quantities."""
+    boq_path = os.path.join(project_root, "boq.txt")
+    if not os.path.exists(boq_path):
+        return None
+        
+    boq = {}
+    with open(boq_path, "r") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = line.split(":")
+            if len(parts) == 2:
+                try:
+                    boq[parts[0].strip().lower()] = int(parts[1].strip())
+                except ValueError:
+                    continue
+                    
+    # Empty BOQ means greedy collection
+    return boq if boq else None
+
+def filter_by_boq(results, boq):
+    """Filters AI detections strictly against the required BOQ constraint."""
+    if boq is None:
+        return [f"{cx} {cy} {angle:.1f}" for (cx, cy, angle, _, _) in results]
+        
+    filtered_locations = []
+    current_boq = boq.copy()
+    
+    for cx, cy, angle, label, conf in results:
+        lbl = label.lower()
+        if current_boq.get(lbl, 0) > 0:
+            filtered_locations.append(f"{cx} {cy} {angle:.1f}")
+            current_boq[lbl] -= 1
+            
+    return filtered_locations
 
 
 def run_detection(src):
-    """Run YOLO OBB detection on a camera frame or image file. Returns pixel locations."""
+    """Run YOLO OBB detection on a camera frame or image file. Returns filtered pixel locations."""
+    boq = load_boq()
+    if boq is not None:
+        print(f"-> BOQ Logistics Mode ACTIVE: {json.dumps(boq)}")
+    else:
+        print("-> BOQ Not Found/Empty. Defaulting to Greedy Collection Mode.")
     if src == "camera":
         cap = cv2.VideoCapture(config["webcam_id"])
         if not cap.isOpened():
@@ -47,7 +90,7 @@ def run_detection(src):
             confidence = max(conf_pct / 100.0, 0.01)
 
             annotated, results = detect_and_annotate(frame, confidence)
-            locations = [f"{cx} {cy} {angle:.1f}" for (cx, cy, angle, _, _) in results]
+            locations = filter_by_boq(results, boq)
 
             cv2.imshow("PickerBot", annotated)
 
@@ -68,7 +111,7 @@ def run_detection(src):
             sys.exit(1)
 
         annotated, results = detect_and_annotate(frame)
-        locations = [f"{cx} {cy} {angle:.1f}" for (cx, cy, angle, _, _) in results]
+        locations = filter_by_boq(results, boq)
 
         cv2.imshow("PickerBot - Detected Objects", annotated)
         cv2.waitKey(0)
