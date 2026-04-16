@@ -209,3 +209,7 @@ __marimo__/
 # EPSON
 Epson/Pickerbot_Receiver/Pickerbot_Receiver/*.bak
 Epson/Pickerbot_Receiver/Pickerbot_Receiver/*.lock
+
+# Ignore Latex files
+*.tex
+*.bib
