@@ -1,7 +1,7 @@
 # Picker-Bot
 
-**Developers:** Aman Mishra (M00983641), Faseeh Mohammed (M01088120)
-**Module:** PDE4435 Robot Systems Integration | **University:** Middlesex University Dubai
+**Developers:** Aman Mishra (M00983641), Faseeh Mohammed (M01088120)  
+**Module:** PDE4435 Robot Systems Integration | **University:** Middlesex University Dubai  
 **Program:** MSc Robotics
 
 ---
