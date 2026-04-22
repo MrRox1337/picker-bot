@@ -72,6 +72,58 @@ picker-bot/
 
 ---
 
+## Software Architecture
+
+The system is organised around three runnable entry points, a single importable support package (`pickerbot_lib`), and an external robot controller reached over TCP/IP. The diagram below shows the runtime relationship between these components and the external resources they consume.
+
+```mermaid
+flowchart TD
+    User([User / Operator])
+
+    subgraph Entrypoints["Entry Points"]
+        PB["pickerbot.py<br/><i>full pipeline</i>"]
+        DC["detect_and_classify.py<br/><i>vision-only mode</i>"]
+        TM["teleop_mouse.py<br/><i>manual control</i>"]
+    end
+
+    subgraph Lib["pickerbot_lib/"]
+        Det["detection.py<br/>YOLOv8-OBB inference"]
+        Cal["calibration.py<br/>Homography &amp; pixel→world"]
+        Snd["sender.py<br/>TCP socket commands"]
+    end
+
+    Model[("models/best.pt<br/>camera / image")]
+    CSV[("data/calibration/*.csv")]
+    TCP{{"TCP 127.0.0.1:2001"}}
+
+    subgraph Robot["Robot Side"]
+        RC8["EPSON RC8 Controller<br/>Pickerbot_Receiver/Main.prg<br/><i>SPEL+ server</i>"]
+        Arm["EPSON VT6-A901S<br/>6-axis manipulator"]
+    end
+
+    User -->|CLI args, config.json| PB
+    User --> DC
+    User --> TM
+
+    PB --> Det
+    PB --> Cal
+    PB --> Snd
+    DC --> Det
+    TM --> Cal
+    TM --> Snd
+
+    Det --> Model
+    Cal --> CSV
+    Snd --> TCP
+
+    TCP --> RC8
+    RC8 --> Arm
+```
+
+Data flows from the operator down through the entry points, which parse configuration and command-line arguments and delegate vision, calibration, and transport work to the three modules inside `pickerbot_lib`. These modules collectively produce the TCP command stream consumed by the SPEL+ server running on the EPSON RC8 controller, which in turn drives the VT6-A901S manipulator.
+
+---
+
 ## Content Libraries
 
 The `pickerbot_lib` package is designed to be imported by the entry-point scripts and can also be used directly:
