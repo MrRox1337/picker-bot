@@ -234,10 +234,10 @@ On the robot side, deploy `Epson/Pickerbot_Receiver/Main.prg` to the controller.
 
 Detection uses the YOLOv8-OBB model (`models/best.pt`) to locate microelectronic modules and estimate their orientation angle.
 
-- **Live camera:** Set `"input_mode": "camera"` and `"webcam_id": 1` in `config.json`.
+- **Live camera:** Set `"input_mode": "webcam"` (or `"camera"`) and `"webcam_id": 1` in `config.json`.
 - **Static image:** Set `"input_mode": "image"` and `"test_image_path": "data/test-samples/<filename>"`.
 
-The confidence threshold is controlled by `"min_confidence"` (default `0.7`).
+The confidence threshold is controlled by `"min_confidence"` (default `0.65`).
 
 ### Step 4 — Pick Operation
 
@@ -309,10 +309,10 @@ python tools/camera_alignment.py        # Visualise saved calibration points
 
 ### `pickerbot.py`
 
-| Argument      | Default    | Description                                                                    |
-| ------------- | ---------- | ------------------------------------------------------------------------------ |
-| `--src`       | `"camera"` | Input source. Use `"camera"` for live feed or provide a path to an image file. |
-| `--calibrate` | off        | Run the height recalibration GUI and exit.                                     |
+| Argument      | Default                      | Description                                                                                             |
+| ------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `--src`       | _(from `config.json`)_       | Input source. Use `"camera"` for live feed or provide a path to an image file. Falls back to `input_mode` / `test_image_path` from `config.json` when omitted. |
+| `--calibrate` | off                          | Run the height recalibration GUI and exit.                                                              |
 
 ### `detect_and_classify.py`
 
@@ -326,10 +326,10 @@ python tools/camera_alignment.py        # Visualise saved calibration points
 
 | Key                | Type   | Default                                            | Description                                                   |
 | ------------------ | ------ | -------------------------------------------------- | ------------------------------------------------------------- |
-| `input_mode`       | string | `"image"`                                          | `"image"` to use a test image, `"camera"` for live feed.      |
+| `input_mode`       | string | `"webcam"`                                         | Input source when `--src` is not passed. `"webcam"` or `"camera"` for live feed; `"image"` to use `test_image_path`. |
 | `webcam_id`        | int    | `1`                                                | Camera device index (`0` = built-in, `1` = first USB camera). |
-| `test_image_path`  | string | `"data/test-samples/31.jpg"`                       | Path to the test image when `input_mode` is `"image"`.        |
-| `min_confidence`   | float  | `0.7`                                              | YOLO detection confidence threshold (0.0–1.0).                |
+| `test_image_path`  | string | `"data/test-samples/14.jpg"`                       | Path to the test image when `input_mode` is `"image"`.        |
+| `min_confidence`   | float  | `0.65`                                             | YOLO detection confidence threshold (0.0–1.0).                |
 | `enable_epson_tcp` | bool   | `false`                                            | Enable/disable TCP commands to the robot.                     |
 | `epson_ip`         | string | `"127.0.0.1"`                                      | Robot controller IP address.                                  |
 | `epson_port`       | int    | `2001`                                             | Robot controller TCP port.                                    |
