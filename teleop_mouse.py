@@ -37,10 +37,8 @@ def main():
 
     print("\n3. System Ready! Loading Image UI...")
 
-    if CONFIG.get("calibration_file"):
-        img_path = resolve("data/test-samples/ruler.jpg")
-    else:
-        img_path = resolve("data/calibration/graph_paper.jpg")
+    default_img = resolve("data/calibration/graph_paper.jpg")
+    img_path = resolve(CONFIG["teleop_image"]) if CONFIG.get("teleop_image") else default_img
     img = cv2.imread(img_path)
 
     if img is None:

@@ -1,11 +1,12 @@
 {
-  "input_mode": "webcam",
+  "input_mode": "image",
   "webcam_id": 1,
-  "test_image_path": "data/test-samples/14.jpg",
+  "test_image_path": "data/test-samples/10.jpg",
   "min_confidence": 0.65,
   "enable_epson_tcp": false,
   "epson_ip": "127.0.0.1",
   "epson_port": 2001,
   "robot_z": 360,
-  "calibration_file": "data/calibration/calibration_pixels.csv"
+  "calibration_file": "data/calibration/calibration_pixels_scaled.csv",
+  "teleop_image": "data/calibration/ruler.jpg"
 }

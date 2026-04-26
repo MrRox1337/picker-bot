@@ -352,3 +352,4 @@ python tools/camera_alignment.py        # Visualise saved calibration points
 | `epson_port`       | int    | `2001`                                             | Robot controller TCP port.                                                                                           |
 | `robot_z`          | int    | `360`                                              | Default Z-axis pick height in mm.                                                                                    |
 | `calibration_file` | string | `"data/calibration/calibration_pixels_scaled.csv"` | Path to the active calibration CSV.                                                                                  |
+| `teleop_image`     | string | `"data/calibration/graph_paper.jpg"`               | Background image shown in the `teleop_mouse.py` click UI. Set to any image that matches the calibration surface.    |
