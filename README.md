@@ -9,6 +9,7 @@
 ## Contents
 
 - [About](#about)
+- [Technical Demonstration](#technical-demonstration)
 - [Codebase Structure](#codebase-structure)
 - [Software Architecture](#software-architecture)
 - [Content Libraries](#content-libraries)
@@ -20,6 +21,7 @@
 - [Usage Examples](#usage-examples)
 - [Command-Line Reference](#command-line-reference)
 - [Configuration Reference (`config.json`)](#configuration-reference-configjson)
+- [Acknowledgements](#acknowledgements)
 
 ---
 
@@ -27,9 +29,17 @@
 
 Picker-Bot is a computer-vision-guided pick-and-place system built around an **EPSON VT6-A901S** 6-axis industrial manipulator. It detects microelectronic modules on a work surface using a **YOLOv8 Oriented Bounding Box (OBB)** model, maps their pixel locations to real-world robot coordinates via **homography calibration**, and commands the robot to pick each module and deposit it in a collection tray — all over a **TCP/IP** socket link.
 
-Demo [link](https://youtu.be/Rdq7Mrz8RIk)
-
 Key technologies: Python, OpenCV, Ultralytics YOLOv8, NumPy, Epson RC8 robot programming.
+
+---
+
+## Technical Demonstration
+
+<a href="https://youtu.be/Rdq7Mrz8RIk" target="_blank">
+  <img src="https://img.youtube.com/vi/Rdq7Mrz8RIk/hqdefault.jpg" alt="Picker-Bot Demo Video" width="560"/>
+</a>
+
+[View Technical Presentation](https://mrrox1337.github.io/picker-bot/docs/index.html#1)
 
 ---
 
@@ -355,3 +365,15 @@ python tools/camera_alignment.py        # Visualise saved calibration points
 | `robot_z`          | int    | `360`                                              | Default Z-axis pick height in mm.                                                                                    |
 | `calibration_file` | string | `"data/calibration/calibration_pixels_scaled.csv"` | Path to the active calibration CSV.                                                                                  |
 | `teleop_image`     | string | `"data/calibration/graph_paper.jpg"`               | Background image shown in the `teleop_mouse.py` click UI. Set to any image that matches the calibration surface.    |
+
+---
+
+## Acknowledgements
+
+**Dr. Judhi Presetyo** — provided the initial EPSON TCP template script that formed the basis of the robot communication layer.
+
+**EPSON SPEL+ Language Reference Manual** — primary reference for the SPEL+ command set used in `Epson/Pickerbot_Receiver/Main.prg`.
+
+**Bilal Baslar** — recommended YOLOv8-OBB as the detection approach for Phase 2, replacing the earlier threshold-based contour method.
+
+**Claude (Anthropic)** — code refactor support: centralising `config.json` usage across all entry points and library modules, librarising key components into the importable `pickerbot_lib` package, and removing redundant hardcoded values.
