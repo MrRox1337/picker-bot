@@ -6,7 +6,7 @@ import sys
 import json
 import math
 
-_project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from pickerbot_lib.config import PROJECT_ROOT as _project_root
 
 # --- CALIBRATION FUNCTIONS ---
 def load_calibration_data(csv_filename):

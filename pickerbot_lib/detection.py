@@ -1,19 +1,13 @@
-import os
 import math
 import cv2
 from ultralytics import YOLO
 
-# ── Configuration ──────────────────────────────────────────────
-DEFAULT_CONFIDENCE = 0.70
-CAMERA_ID = 1
-# ───────────────────────────────────────────────────────────────
+from pickerbot_lib.config import CONFIG, resolve
 
-# Load YOLO OBB model once at module level
-_project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-model = YOLO(os.path.join(_project_root, "models", "best.pt"))
+model = YOLO(resolve("models/best.pt"))
 
 
-def detect_and_annotate(frame, confidence=DEFAULT_CONFIDENCE):
+def detect_and_annotate(frame, confidence=None):
     """Run YOLO OBB inference on a frame. Returns (annotated_frame, results).
 
     Each result is a tuple: (cx, cy, angle, label, conf)
@@ -22,11 +16,14 @@ def detect_and_annotate(frame, confidence=DEFAULT_CONFIDENCE):
     - label: class name string
     - conf: confidence float 0.0-1.0
     """
+    if confidence is None:
+        confidence = CONFIG["min_confidence"]
+
     raw_results = model(frame, conf=confidence, verbose=False)
     result = raw_results[0]
 
-    # YOLO renders the OBBs natively
-    annotated = result.plot()
+    # Suppress YOLO's native label overlay; we draw our own with centroid + angle below.
+    annotated = result.plot(labels=False, conf=False)
 
     detections = []
     if result.obb is not None:
@@ -44,10 +41,8 @@ def detect_and_annotate(frame, confidence=DEFAULT_CONFIDENCE):
 
             detections.append((cx, cy, angle, label, conf))
 
-            # Draw centroid dot
             cv2.circle(annotated, (int(cx), int(cy)), 4, (0, 0, 255), -1)
 
-            # Draw small label with centroid and angle
             text = f"{label} {conf*100:.1f}% ({int(cx)},{int(cy)}) {angle:.1f} deg"
             (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.3, 1)
             tx, ty = int(cx) - tw // 2, int(cy) - 10
