@@ -6,6 +6,27 @@
 
 ---
 
+## Contents
+
+- [About](#about)
+- [Codebase Structure](#codebase-structure)
+- [Software Architecture](#software-architecture)
+- [Content Libraries](#content-libraries)
+  - [`pickerbot_lib.sender` — Robot TCP Interface](#pickerbotlibsender--robot-tcp-interface)
+  - [`pickerbot_lib.detection` — YOLO Detection Module](#pickerbotlibdetection--yolo-detection-module)
+  - [`pickerbot_lib.calibration` — Calibration Utilities](#pickerbotlibcalibration--calibration-utilities)
+  - [`legacy/keras_inference.py` — Keras Classifier](#legacykeras_inferencepy--keras-classifier)
+- [Standard Operation Steps](#standard-operation-steps)
+  - [Step 1 — Calibration](#step-1--calibration)
+  - [Step 2 — TCP Connection](#step-2--tcp-connection)
+  - [Step 3 — Detection](#step-3--detection)
+  - [Step 4 — Pick Operation](#step-4--pick-operation)
+- [Usage Examples](#usage-examples)
+- [Command-Line Reference](#command-line-reference)
+- [Configuration Reference (`config.json`)](#configuration-reference-configjson)
+
+---
+
 ## About
 
 Picker-Bot is a computer-vision-guided pick-and-place system built around an **EPSON VT6-A901S** 6-axis industrial manipulator. It detects microelectronic modules on a work surface using a **YOLOv8 Oriented Bounding Box (OBB)** model, maps their pixel locations to real-world robot coordinates via **homography calibration**, and commands the robot to pick each module and deposit it in a collection tray — all over a **TCP/IP** socket link.
@@ -309,10 +330,10 @@ python tools/camera_alignment.py        # Visualise saved calibration points
 
 ### `pickerbot.py`
 
-| Argument      | Default                      | Description                                                                                             |
-| ------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `--src`       | _(from `config.json`)_       | Input source. Use `"camera"` for live feed or provide a path to an image file. Falls back to `input_mode` / `test_image_path` from `config.json` when omitted. |
-| `--calibrate` | off                          | Run the height recalibration GUI and exit.                                                              |
+| Argument      | Default                | Description                                                                                                                                                    |
+| ------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--src`       | _(from `config.json`)_ | Input source. Use `"camera"` for live feed or provide a path to an image file. Falls back to `input_mode` / `test_image_path` from `config.json` when omitted. |
+| `--calibrate` | off                    | Run the height recalibration GUI and exit.                                                                                                                     |
 
 ### `detect_and_classify.py`
 
@@ -324,14 +345,14 @@ python tools/camera_alignment.py        # Visualise saved calibration points
 
 ## Configuration Reference (`config.json`)
 
-| Key                | Type   | Default                                            | Description                                                   |
-| ------------------ | ------ | -------------------------------------------------- | ------------------------------------------------------------- |
+| Key                | Type   | Default                                            | Description                                                                                                          |
+| ------------------ | ------ | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `input_mode`       | string | `"webcam"`                                         | Input source when `--src` is not passed. `"webcam"` or `"camera"` for live feed; `"image"` to use `test_image_path`. |
-| `webcam_id`        | int    | `1`                                                | Camera device index (`0` = built-in, `1` = first USB camera). |
-| `test_image_path`  | string | `"data/test-samples/14.jpg"`                       | Path to the test image when `input_mode` is `"image"`.        |
-| `min_confidence`   | float  | `0.65`                                             | YOLO detection confidence threshold (0.0–1.0).                |
-| `enable_epson_tcp` | bool   | `false`                                            | Enable/disable TCP commands to the robot.                     |
-| `epson_ip`         | string | `"127.0.0.1"`                                      | Robot controller IP address.                                  |
-| `epson_port`       | int    | `2001`                                             | Robot controller TCP port.                                    |
-| `robot_z`          | int    | `360`                                              | Default Z-axis pick height in mm.                             |
-| `calibration_file` | string | `"data/calibration/calibration_pixels_scaled.csv"` | Path to the active calibration CSV.                           |
+| `webcam_id`        | int    | `1`                                                | Camera device index (`0` = built-in, `1` = first USB camera).                                                        |
+| `test_image_path`  | string | `"data/test-samples/14.jpg"`                       | Path to the test image when `input_mode` is `"image"`.                                                               |
+| `min_confidence`   | float  | `0.65`                                             | YOLO detection confidence threshold (0.0–1.0).                                                                       |
+| `enable_epson_tcp` | bool   | `false`                                            | Enable/disable TCP commands to the robot.                                                                            |
+| `epson_ip`         | string | `"127.0.0.1"`                                      | Robot controller IP address.                                                                                         |
+| `epson_port`       | int    | `2001`                                             | Robot controller TCP port.                                                                                           |
+| `robot_z`          | int    | `360`                                              | Default Z-axis pick height in mm.                                                                                    |
+| `calibration_file` | string | `"data/calibration/calibration_pixels_scaled.csv"` | Path to the active calibration CSV.                                                                                  |
