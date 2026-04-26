@@ -27,6 +27,8 @@
 
 Picker-Bot is a computer-vision-guided pick-and-place system built around an **EPSON VT6-A901S** 6-axis industrial manipulator. It detects microelectronic modules on a work surface using a **YOLOv8 Oriented Bounding Box (OBB)** model, maps their pixel locations to real-world robot coordinates via **homography calibration**, and commands the robot to pick each module and deposit it in a collection tray — all over a **TCP/IP** socket link.
 
+Demo [link](https://youtu.be/Rdq7Mrz8RIk)
+
 Key technologies: Python, OpenCV, Ultralytics YOLOv8, NumPy, Epson RC8 robot programming.
 
 ---
