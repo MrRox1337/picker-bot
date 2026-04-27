@@ -39,7 +39,7 @@ Key technologies: Python, OpenCV, Ultralytics YOLOv8, NumPy, Epson RC8 robot pro
   <img src="https://img.youtube.com/vi/Rdq7Mrz8RIk/hqdefault.jpg" alt="Picker-Bot Demo Video" width="560"/>
 </a>
 
-[View Technical Presentation](https://mrrox1337.github.io/picker-bot/docs/index.html#1)
+[View Technical Presentation](https://mrrox1337.github.io/picker-bot/#1)
 
 ---
 
