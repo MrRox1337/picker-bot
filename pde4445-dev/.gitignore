@@ -180,3 +180,7 @@ Epson/Pickerbot_Receiver/Pickerbot_Receiver/*.lock
 
 # Merged from Repo Pickerbot/faseeh
 *.db3
+
+# Ignore local image dataset folder
+C:/Users/10463/MB_faseeh/REPO/picker-bot/pde4445-dev/IMG/
+pde4445-dev/IMG/

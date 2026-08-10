@@ -15,6 +15,7 @@ def process_image(image_path):
     annotated, results = detect_and_annotate(frame, CONFIG["min_confidence"])
     locations = [f"{cx} {cy} {angle:.1f}" for (cx, cy, angle, _, _) in results]
 
+    cv2.namedWindow("Detected Objects", cv2.WINDOW_NORMAL)
     cv2.imshow("Detected Objects", annotated)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
