@@ -25,7 +25,7 @@ from pickerbot_lib.detection import detect_and_annotate  # loads models/best.pt 
 
 # ============================ settings you can tweak ============================
 SOURCE   = "db3"          # "db3"  or  "mp4"   <-- flip this to switch input
-DB3_PATH = os.path.join(os.path.dirname(__file__), "m5.db3")
+DB3_PATH = os.path.join(os.path.dirname(__file__), "independence.db3")
 MP4_PATH = os.path.join(os.path.dirname(__file__), "capture.mp4")
 STEP     = 30             # frames to advance each keypress (bigger = more variety)
 CONF     = 0.25           # detection confidence (low, so you see marginal hits)
