@@ -9,10 +9,10 @@ Function main
 	Motor On
 	Power Low
 	Speed 10
-	SpeedR 10
-	Accel 10, 10
-	SpeedS 10
-	AccelS 10, 10
+	SpeedR 20
+	Accel 20, 20
+	SpeedS 20
+	AccelS 20, 20
 	Tool 1
 	
 

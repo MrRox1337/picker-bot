@@ -4,7 +4,7 @@
   "test_image_path": "data/test-samples/10.jpg",
   "min_confidence": 0.65,
   "enable_epson_tcp": false,
-  "epson_ip": "127.0.0.1",
+  "epson_ip": "192.168.1.2",
   "epson_port": 2001,
   "robot_z": 360,
   "calibration_file": "data/calibration/calibration_pixels_scaled.csv",

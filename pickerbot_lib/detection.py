@@ -4,7 +4,7 @@ from ultralytics import YOLO
 
 from pickerbot_lib.config import CONFIG, resolve
 
-model = YOLO(resolve("models/best.pt"))
+model = YOLO(resolve("models/legacy.pt"))
 
 
 def detect_and_annotate(frame, confidence=None):
