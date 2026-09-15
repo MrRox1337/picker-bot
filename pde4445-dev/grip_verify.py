@@ -15,22 +15,39 @@ min_open was -53 and is meaningless now that min_open is 888.
 
 Run from picker-bot (GripSense is found automatically as a sibling repo):
     python pde4445-dev/grip_verify.py            # uses TEST_CURRENT
-    python pde4445-dev/grip_verify.py 110        # or pass a current
+    python pde4445-dev/grip_verify.py 100        # or pass a current
+    python pde4445-dev/grip_verify.py 100 esp    # ...and record it as a CLASS PROFILE
+
+The third form appends to grip_profiles.json. Because each class arrests the
+fingers at its own characteristic position, storing that position per class turns
+verification from "something is between the fingers" into "an object of roughly
+THIS class's width is between the fingers" - which also catches an edge-grasp or
+two parts taken at once. Vision supplies the class; the servo checks the width.
 
 SAFETY: fingers must be CLEAR during the empty measurements.
 Torque is released in the finally block.
 """
-import sys, os, time
+import sys, os, time, json, statistics
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
 from gripsense_path import load_settings          # noqa: E402
+
+PROFILES = os.path.join(HERE, "grip_profiles.json")
+PROFILE_TOL = 90       # +/- ticks a stall may sit from its class mean and still
+                       # count as that class. Wide enough for placement variation,
+                       # tight enough that an edge-grasp falls outside.
 
 settings, REPO = load_settings()
 
-TEST_CURRENT     = 110    # the grip current we actually pick with
+# OPERATING RANGE IS 100-120 RAW (Aman's gripper_config.yaml: current.min 100,
+# current.max 120). Everything measured before 12 Sep used 80-90, below the floor,
+# where the fingers stall at ~1646 on friction and never touch a thin module.
+TEST_CURRENT     = 100    # the grip current we actually pick with
 OPEN_CURRENT     = 120    # opening must exceed the grip; 120 is the servo's cap
-RELAX_CURRENT    = 50     # relax before opening so padding decompresses
-VELOCITY         = 40
+RELAX_CURRENT    = 100    # never command below the configured minimum
+VELOCITY         = 60     # closing speed; the calibration probes at 60
+OPEN_VELOCITY    = 480    # the calibration REOPENS at 480 - at 40 the open crawls
 REPEATS          = 3
 SETTLE_TIMEOUT_S = 3.0
 OPEN_TIMEOUT_S   = 10.0
@@ -79,12 +96,11 @@ def settle(timeout=SETTLE_TIMEOUT_S):
 
 
 def open_fingers():
-    # Relax first: muscling out of a firm grip does not work when only ~10 raw
-    # of headroom remains under the servo's current cap.
+    # Match what the teleop GUI does, which opens these fingers cleanly: retarget,
+    # go fast, 120 raw. The old relax-at-50 step belonged to the sub-100 regime and
+    # left this function ending MORE CLOSED than it started.
     try:
-        _G.set_goal_position(_G.read_present_position())
-        set_current(RELAX_CURRENT)
-        time.sleep(0.3)
+        _G.set_profile_velocity(OPEN_VELOCITY)
     except OSError:
         pass
     _G.set_goal_position(MAX_OPEN)          # re-target BEFORE raising the ceiling
@@ -96,14 +112,60 @@ def open_fingers():
 
 
 def close_on(current, min_open):
+    try:
+        _G.set_profile_velocity(VELOCITY)   # slow onto the object
+    except OSError:
+        pass
     set_current(current)
     _G.set_goal_position(min_open)
     return settle()
 
 
+def save_profile(label, current, empty, loaded, max_open, min_open):
+    """Record this class's stall band so a later grasp can be checked against it."""
+    data = {}
+    if os.path.exists(PROFILES):
+        try:
+            data = json.load(open(PROFILES))
+        except ValueError:
+            print("  (grip_profiles.json was unreadable - starting a new one)")
+    # A profile is only comparable within one calibration and one grip current.
+    # If either changed, everything already in the file is void.
+    key = {"calib_max_open": max_open, "calib_min_open": min_open,
+           "grip_current": current}
+    if data.get("key") and data["key"] != key:
+        print(f"  *** calibration or current changed {data['key']} -> {key}")
+        print(f"  *** discarding {len(data.get('classes', {}))} stale class profile(s)")
+        data = {}
+    data["key"] = key
+    data["empty_stall"] = int(statistics.mean(empty))
+    data.setdefault("classes", {})[label] = {
+        "stall": int(statistics.mean(loaded)),
+        "spread": int(max(loaded) - min(loaded)),
+        "tol": PROFILE_TOL,
+        "samples": list(map(int, loaded)),
+        "when": time.strftime("%Y-%m-%dT%H:%M:%S"),
+    }
+    json.dump(data, open(PROFILES, "w"), indent=2)
+    print(f"\n  profile saved: {label} stalls at "
+          f"{data['classes'][label]['stall']} +/- {PROFILE_TOL}  -> {PROFILES}")
+    known = data["classes"]
+    if len(known) > 1:
+        ordered = sorted(known.items(), key=lambda kv: kv[1]["stall"])
+        print("  classes recorded so far (empty = %d):" % data["empty_stall"])
+        for name, c in ordered:
+            print(f"    {name:11} {c['stall']:>5}")
+        gaps = [b[1]["stall"] - a[1]["stall"] for a, b in zip(ordered, ordered[1:])]
+        if min(gaps) < 2 * PROFILE_TOL:
+            print(f"  *** two classes are only {min(gaps)} ticks apart, closer than")
+            print(f"  *** the +/-{PROFILE_TOL} tolerance - they cannot be told apart "
+                  f"by stall alone.")
+
+
 def main():
     global MAX_OPEN, _G
     current = int(sys.argv[1]) if len(sys.argv) > 1 else TEST_CURRENT
+    label = sys.argv[2] if len(sys.argv) > 2 else None
     max_open, min_open, calibrated = settings.travel_limits()
     if not calibrated:
         raise SystemExit("Not calibrated - run the calibration wizard first.")
@@ -155,6 +217,11 @@ def main():
         else:
             print(f"\n  OVERLAP (gap {gap} ticks). Position cannot tell a grasp from air")
             print("  at this current - the grasp needs visual confirmation instead.")
+        if label:
+            save_profile(label, current, empty, loaded, max_open, min_open)
+        else:
+            print("\n  (pass a class name as the 2nd argument to record a profile,")
+            print("   e.g.  python pde4445-dev/grip_verify.py 100 esp)")
         print("\nSend me these numbers.")
     finally:
         try:
