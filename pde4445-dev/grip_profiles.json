@@ -1,0 +1,54 @@
+{
+  "key": {
+    "calib_max_open": 3541,
+    "calib_min_open": 655,
+    "grip_current": 100
+  },
+  "empty_stall": 708,
+  "classes": {
+    "arduino": {
+      "stall": 1859,
+      "spread": 9,
+      "tol": 90,
+      "samples": [
+        1860,
+        1863,
+        1854
+      ],
+      "when": "2026-09-12T13:33:57"
+    },
+    "lcd": {
+      "stall": 1143,
+      "spread": 2,
+      "tol": 90,
+      "samples": [
+        1144,
+        1143,
+        1142
+      ],
+      "when": "2026-09-12T13:35:35"
+    },
+    "ultrasonic": {
+      "stall": 901,
+      "spread": 59,
+      "tol": 90,
+      "samples": [
+        889,
+        878,
+        937
+      ],
+      "when": "2026-09-12T13:37:00"
+    },
+    "esp": {
+      "stall": 1237,
+      "spread": 4,
+      "tol": 90,
+      "samples": [
+        1236,
+        1240,
+        1237
+      ],
+      "when": "2026-09-12T13:38:12"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+# Bill of quantities - what the operator asked for.
+# One 'class: quantity' per line. Names are matched loosely (esp32 -> esp).
+# Only arduino can be confirmed from the servo; esp and lcd are confirmed by the
+# verification re-scan, so run the BOQ fetch with --rescan end.
+arduino: 1
+esp32:   1
+lcd:     1

@@ -1,0 +1,30 @@
+{
+  "slope_ticks_per_mm": 25.983,
+  "intercept_ticks": 758.4,
+  "rms_mm": 0.12,
+  "calib_max_open": 3541,
+  "calib_min_open": 655,
+  "measured": [
+    {
+      "gap_mm": 35.0,
+      "ticks": 1672
+    },
+    {
+      "gap_mm": 53.0,
+      "ticks": 2131
+    },
+    {
+      "gap_mm": 71.0,
+      "ticks": 2601
+    },
+    {
+      "gap_mm": 89.0,
+      "ticks": 3072
+    },
+    {
+      "gap_mm": 107.0,
+      "ticks": 3540
+    }
+  ],
+  "when": "2026-09-12T13:54:42"
+}
