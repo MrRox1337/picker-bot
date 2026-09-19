@@ -82,6 +82,31 @@ Function main
 			Print #201, "OK"
 		EndIf
 		
+				' ---- taught-point poses: the only way to change the wrist V,W ----
+		' Use Go, NOT Jump. Jump is a SCARA-only gate motion and raises error
+		' 4034 on the 6-axis VT6. Go moves to the taught pose including U, V, W.
+
+		' if the command is capture -> camera-down scan pose
+		If LCase$(indata$(0)) = "capture" Then
+			Print "Going to CAPTURE pose (camera down)"
+			Go cap
+			Print #201, "OK"
+		EndIf
+
+		' if the command is ready -> gripper-down pick pose
+		If LCase$(indata$(0)) = "ready" Then
+			Print "Going to READY pose (gripper down)"
+			Go gripperdown
+			Print #201, "OK"
+		EndIf
+
+		' if the command is place -> taught drop pose
+		If LCase$(indata$(0)) = "place" Then
+			Print "Going to PLACE pose"
+			Go PlacePoint
+			Print #201, "OK"
+		EndIf
+		
 		' if the command is standby
 		If LCase$(indata$(0)) = "standby" Then
 			TMove XY(0, 0, -50, 0, 0, 0)

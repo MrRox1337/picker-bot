@@ -1,4 +1,4 @@
-ENVT0100,LM:2026/09/02 17:19:43:255,DS:0000007270,CS:26927,MA:50-2E-91-60-24-D7,EI:           
+ENVT0100,LM:2026/09/19 15:22:02:516,DS:0000007271,CS:32541,MA:50-2E-91-60-24-D7,EI:           
 SystemProperties {
 	sRCVersion="8.0.0"
 	sRCRevision=""
@@ -10,8 +10,8 @@ SystemProperties {
 	sGUID="044c4efe-805a-45b5-9715-973533620e09"
 	sPath="C:\\Users\\10463\\MB_faseeh\\REPO\\picker-bot\\Epson\\Pickerbot_Receiver\\Pickerbot_Receiver"
 	sCreated="4/6/2026 4:47:32 PM"
-	sLastModified="9/2/2026 8:35:55 PM"
-	sLastSyncDate="9/2/2026 8:35:55 PM"
+	sLastModified="9/15/2026 6:18:16 PM"
+	sLastSyncDate="9/15/2026 6:18:16 PM"
 }
 UserProperties {
 	sVersion=""
@@ -35,7 +35,7 @@ ProgramFile1 {
 	sName="Main.prg"
 	bCompiled=True
 	bStoreInController=True
-	sTimeSavedInController="9/2/2026 4:35:52 PM"
+	sTimeSavedInController="9/5/2026 9:26:48 AM"
 }
 nIncludeFileCount=0
 nPointFileCount=1
@@ -43,7 +43,7 @@ PointFile1 {
 	sName="robot1.pts"
 	nRobot=1
 	bDefault=True
-	sTimeSavedInController="9/2/2026 11:20:19 AM"
+	sTimeSavedInController="9/5/2026 9:30:45 AM"
 }
 nForceFileCount=0
 OperatorSettings {
