@@ -162,6 +162,13 @@ def main():
                          "Equivalent to re-running per threshold, ~6x faster.")
     ap.add_argument("--sweep", action="store_true", help="also emit the confidence curve")
     ap.add_argument("--sweep-points", default="0.25,0.35,0.45,0.55,0.65,0.75")
+    ap.add_argument("--exclude", nargs="*", default=["static"],
+                    help="conditions to leave OUT of the detection benchmark. "
+                         "'static' is captured for pose repeatability, not recall: it "
+                         "is one scene shot repeatedly and its manifest note carries no "
+                         "counts, so the ground truth falls back to the 5-part baseline "
+                         "and every missing part is phantom. Scoring it as detection "
+                         "invented 4 arduino misses that were never on the bench.")
     ap.add_argument("--limit", type=int, default=None, help="first N recordings only")
     ap.add_argument("--outdir", default=OUTDIR)
     ap.add_argument("--stack-mm", type=float, default=12.0,
@@ -185,6 +192,12 @@ def main():
         if not os.path.exists(cache):
             raise SystemExit(f"No cache at {cache} — run once without --from-cache first.")
         results = json.load(open(cache, encoding="utf-8"))
+        if args.exclude:
+            n0 = len(results)
+            results = [r for r in results if r["condition"] not in args.exclude]
+            if n0 != len(results):
+                print(f"excluding {n0 - len(results)} cached recording(s) from "
+                      f"{args.exclude} — not detection benchmarks")
         for s in results:
             at = [p for p in s["picks"] if p["conf"] >= args.conf]
             g, h, m, o = score(s["truth"], at)
@@ -196,6 +209,12 @@ def main():
     if not os.path.exists(args.manifest):
         raise SystemExit(f"No manifest at {args.manifest}")
     scenes = load_manifest(args.manifest, args.limit)
+    if args.exclude:
+        before = len(scenes)
+        scenes = [s_ for s_ in scenes if s_["condition"] not in args.exclude]
+        if before != len(scenes):
+            print(f"excluding {before - len(scenes)} recording(s) from conditions "
+                  f"{args.exclude} — not detection benchmarks")
     os.makedirs(os.path.join(args.outdir, "overlays"), exist_ok=True)
     print(f"{len(scenes)} recordings from {args.manifest}")
     print(f"ground truth per scene: "

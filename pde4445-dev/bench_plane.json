@@ -1,0 +1,50 @@
+{
+ "contact_mean_mm": 211.4,
+ "contact_median_mm": 211.0,
+ "contact_spread_mm": 1.0,
+ "n_points": 5,
+ "plane_fitted": false,
+ "refused_because": [
+  "every reading is a whole millimetre and the total spread is 1 mm, so the measurement resolution is about as large as the effect. Re-measure in 0.25 mm steps before believing any gradient."
+ ],
+ "points": [
+  [
+   -30.0,
+   710.0,
+   211.0
+  ],
+  [
+   -120.0,
+   830.0,
+   212.0
+  ],
+  [
+   60.0,
+   590.0,
+   211.0
+  ],
+  [
+   -120.0,
+   590.0,
+   211.0
+  ],
+  [
+   60.0,
+   830.0,
+   212.0
+  ]
+ ],
+ "check_points": [],
+ "depth_derived": {
+  "slope_x": 0.0005779992673708626,
+  "slope_y": -0.009402931896505595,
+  "n": 61,
+  "residual_sd_mm": 0.9954693033455994,
+  "class_offsets": {
+   "arduino": 248.9183455742693,
+   "esp": 251.40711397978362,
+   "lcd": 251.03754795394173,
+   "ultrasonic": 249.49217906407134
+  }
+ }
+}

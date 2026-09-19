@@ -94,6 +94,28 @@ JAW_BLOCK_MARGIN_MM = 2.0
 
 MAX_ENABLING_MOVES = 3
 SAME_BLOCKER_MM    = 25.0
+# Identity of a PHYSICAL UNIT across re-scans. Every scan produces fresh dicts,
+# so a part can only be recognised as "the one I already tried" by where it is.
+# 25 mm is the same tolerance the blocker matcher uses: wider than the 0.6 mm
+# perception noise floor by a wide margin, narrower than the gap between any two
+# parts in a layout that passed the condition gate.
+SAME_PART_MM       = 25.0
+
+
+def prior_attempts(history, p, tol=SAME_PART_MM):
+    """How many entries in `history` refer to the same physical unit as `p`.
+
+    `history` is a list of (label, x, y). Identity is class AND position: a part
+    of the same class somewhere else is a different unit, and the same class
+    within `tol` of a previous attempt is the same board being retried. Used
+    both to enforce the per-part cap and to hold abandoned units out of later
+    pick lists.
+    """
+    return sum(1 for a in history
+               if a[0] == p["label"]
+               and ((a[1] - p["x"]) ** 2 + (a[2] - p["y"]) ** 2) ** .5 <= tol)
+
+
 # Attempts allowed at the SAME blocker position. One is too few: a blocker that
 # slipped out of the jaws is still movable and deserves another try, whereas one
 # that will not budge at all should not be retried forever. Two separates them.
@@ -462,6 +484,41 @@ def drop_placed(remaining, place_xy, radius=PLACE_RADIUS_MM):
     return keep, dropped
 
 
+# The bench, declared once. Every one of the 140 parts ever actually attempted
+# between 12 and 19 Sep lies inside x -148.6..83.3, y 562.7..845.4,
+# z 245.8..288.0; this envelope is those bounds with room to spare.
+WORKSPACE = {"x": (-250.0, 150.0), "y": (500.0, 900.0), "z": (230.0, 320.0)}
+
+
+def on_bench(p):
+    """Could this detection be a real part on this bench?
+
+    Used for REPORTING ONLY - the pick list is deliberately left alone, so this
+    cannot change what the arm does or which epoch a run belongs to.
+
+    On 19 Sep both easy layouts drew a reproducible phantom 'lcd' at about
+    (-226, 341, 65): 220 mm off the end of the bench and 185 mm below its
+    surface, i.e. something in the far field behind the workspace. The
+    jaw-obstruction guard refused it correctly and it cost no time. But it
+    entered `initial_picks`, so a five-part layout reported "started with 6" and
+    a run that cleared everything scored 5/6 = 83%.
+
+    A phantom is a perception over-detection. It is already counted as one in
+    the vision battery, and it is not a part that failed to be cleared, so it
+    must not appear in a clearance denominator. Excluding it by a fixed
+    envelope, applied to every run and announced when it fires, is a correction;
+    quietly dropping the row would not be.
+    """
+    for axis, key in (("x", "x"), ("y", "y"), ("z", "z")):
+        v = p.get(key)
+        if v is None:
+            continue
+        lo, hi = WORKSPACE[axis]
+        if not (lo <= float(v) <= hi):
+            return False
+    return True
+
+
 def clearance(initial, remaining, tol_mm=35.0, disturb_max=DISTURB_MAX_MM):
     """Which of the ORIGINAL parts have actually left their place on the bench?
 
@@ -477,6 +534,8 @@ def clearance(initial, remaining, tol_mm=35.0, disturb_max=DISTURB_MAX_MM):
     cannot - a part DISTURBED into a new position by the pick of its neighbour,
     which is exactly the effect the sequencing experiment is about.
     """
+    initial = [p for p in initial if on_bench(p)]
+    remaining = [q for q in remaining if on_bench(q)]
     gone, left, moved = [], [], []
     for p in initial:
         same = [q for q in remaining if q["label"] == p["label"]]
@@ -676,6 +735,12 @@ def main():
     ap.add_argument("--min-conf", type=float, default=0.5,
                     help="additionally refuse to PICK anything below this")
     ap.add_argument("--max", type=int, default=10, help="safety cap on pick attempts")
+    ap.add_argument("--max-part-attempts", type=int, default=0, metavar="N",
+                    help="give up on a single physical unit after N failed "
+                         "attempts and log it 'abandoned' (0 = unlimited, the "
+                         "old behaviour). Use 2 for any battery whose success "
+                         "RATE is going to be quoted: without a cap one stubborn "
+                         "part can supply most of a condition's denominator.")
     ap.add_argument("--current", type=int, default=GRIP_CURRENT)
     ap.add_argument("--hold-threshold", type=int, default=HOLD_THRESHOLD,
                     help="stall position above which a grasp is real. RE-MEASURE with "
@@ -806,6 +871,8 @@ def main():
     fulfilled = {}          # class -> count confirmed off the bench
     scene     = []          # every detection from the current scan
     cleared_at = []         # (label, x, y) of blockers already moved
+    attempted_at = []       # (label, x, y) of every unit attempted, for the cap
+    abandoned_at = []       # (label, x, y) of units that hit the cap
     floor_z = args.table_z
 
     try:
@@ -816,6 +883,18 @@ def main():
                 picks = do_scan(args, arm, use_pose_cmds)
                 picks = order_picks(picks, args.order, args.seed, args.z_ref)
                 scene = list(picks)      # the full scan, for blocker lookup
+                # A unit that hit the per-part cap is dropped from the pick list
+                # rather than re-offered, or every re-scan would write it another
+                # 'abandoned' row and the loop would never terminate. It stays in
+                # `scene`, so it is still available as a blocker and still counts
+                # against clearance at the end.
+                if abandoned_at:
+                    before = len(picks)
+                    picks = [q for q in picks
+                             if not prior_attempts(abandoned_at, q)]
+                    if len(picks) < before:
+                        print(f"  {before - len(picks)} abandoned unit(s) held out "
+                              f"of this pick list")
                 floor_z, floor_src = scene_floor(picks, args.table_z)
                 print(f"  order '{args.order}' (z_ref={args.z_ref}): " +
                       ", ".join(f"{p['label']}@{part_top(p, args.z_ref):.0f}"
@@ -893,6 +972,24 @@ def main():
                     .finish("skipped", notes=why))
                 continue
 
+            # PER-PART ATTEMPT CAP. Without one, a single stubborn unit can own a
+            # condition's denominator without bound: on 16 Sep one tilted lcd was
+            # retried six times and supplied 7 of the 29 rows in the "easy" set,
+            # which alone inverted the easy-vs-hard result. The cap converts that
+            # into one bounded, labelled 'abandoned' row - the part is still
+            # reported as unfulfilled, but it can no longer dominate a rate.
+            prior = prior_attempts(attempted_at, p)
+            if args.max_part_attempts and prior >= args.max_part_attempts:
+                note = (f"per-part cap: this {p['label']} has already been "
+                        f"attempted {prior}x within {SAME_PART_MM:.0f} mm")
+                print(f"  abandon {p['label']}: {note}")
+                (log.start_pick(attempts, p)
+                    .record(occlusion=p.get("occlusion"), crowding=p.get("crowding"))
+                    .finish("abandoned", notes=note))
+                abandoned_at.append((p["label"], p["x"], p["y"]))
+                continue
+
+            attempted_at.append((p["label"], p["x"], p["y"]))
             attempts += 1
             if hasattr(grip, "sim_label"):          # dry run: simulate this class
                 grip.sim_label = p["label"]
@@ -1089,7 +1186,16 @@ def main():
                     print("  *** --place-xy not given: parts sitting at the place pose")
                     print("  *** are still being counted as 'on the bench'.")
                 gone, left, moved = clearance(initial_picks, remaining)
-                n0 = len(initial_picks)
+                on_bench_initial = [p for p in initial_picks if on_bench(p)]
+                n0 = len(on_bench_initial)
+                ghosts = len(initial_picks) - n0
+                if ghosts:
+                    print(f"  {ghosts} detection(s) outside the bench envelope "
+                          f"excluded from clearance:")
+                    for p in initial_picks:
+                        if not on_bench(p):
+                            print(f"    {p['label']} @({p['x']:.0f},{p['y']:.0f},"
+                                  f"{p['z']:.0f}) — over-detection, not a part")
                 print(f"  started with {n0}; {len(gone)} gone from their original "
                       f"position, {len(left)} still there")
                 print(f"  CLEARANCE: {len(gone)}/{n0} = {100*len(gone)/n0:.0f}%"
@@ -1103,7 +1209,7 @@ def main():
                     print("   meaningless. The position match above is the real number.)")
                 log.finding(started=n0, cleared=len(gone), still_there=len(left),
                             logged_placed=placed, disturbed=len(moved),
-                            blockers_cleared=cleared)
+                            blockers_cleared=cleared, off_bench_detections=ghosts)
                 if len(gone) != placed:
                     print(f"  *** MISMATCH: the run logged {placed} placed but "
                           f"{len(gone)} left the bench. Trust the scan.")
@@ -1118,8 +1224,110 @@ def main():
         arm.disconnect()
         log.close()
         print(f"\nDone. attempts={attempts}  placed={placed}"
-              + (f"  blockers cleared={cleared}" if cleared else ""))
+              + (f"  blockers cleared={cleared}" if cleared else "")
+              + (f"  abandoned={len(abandoned_at)}" if abandoned_at else ""))
+        if abandoned_at:
+            print("  abandoned units (still on the bench, counted against "
+                  "fulfilment, NOT against the attempt rate):")
+            for lbl, x, y in abandoned_at:
+                print(f"    {lbl} @({x:.1f},{y:.1f})")
+
+
+# ----------------------------------------------------------------- self-test
+def self_test():
+    """Exercise the per-part cap on the real data that motivated it.
+
+    Replays the six positions the tilted lcd was actually retried at on
+    16 Sep (run_20260916_201419), where it drifted 37.3 -> 49.1 mm in x as each
+    failed grasp nudged it. Those six rows were 7 of the 29 attempts in the
+    'easy' condition and inverted the easy-vs-hard result on their own.
+    """
+    import sys as _sys
+    fails = []
+
+    def check(name, got, want):
+        if got != want:
+            fails.append(f"{name}: got {got!r}, wanted {want!r}")
+
+    # The tilted lcd, as logged. Same board, drifting under retry.
+    drift = [(37.3, 610.5), (39.7, 608.8), (42.4, 606.8),
+             (44.9, 605.0), (47.2, 603.8), (49.1, 602.8)]
+    cap, hist, attempted, abandoned = 2, [], 0, 0
+    for x, y in drift:
+        p = {"label": "lcd", "x": x, "y": y}
+        if prior_attempts(hist, p) >= cap:
+            abandoned += 1
+            continue
+        hist.append(("lcd", x, y))
+        attempted += 1
+    # 11.8 mm of total drift is well inside SAME_PART_MM, so all six are one unit.
+    check("attempts allowed on the drifting lcd", attempted, 2)
+    check("rows abandoned instead of retried", abandoned, 4)
+
+    # A part of the same class elsewhere on the bench is a DIFFERENT unit and
+    # must not inherit the cap. 66.8,602.0 is the other lcd from the same run.
+    other = {"label": "lcd", "x": 66.8, "y": 602.0}
+    check("other lcd is a separate unit", prior_attempts(hist, other), 0)
+
+    # A different class at the same spot is also a different unit.
+    check("class is part of identity",
+          prior_attempts(hist, {"label": "esp", "x": 37.3, "y": 610.5}), 0)
+
+    # Exactly at the tolerance boundary the unit is still the same one.
+    check("at tolerance, same unit",
+          prior_attempts([("lcd", 0.0, 0.0)],
+                         {"label": "lcd", "x": SAME_PART_MM, "y": 0.0}), 1)
+    check("just past tolerance, new unit",
+          prior_attempts([("lcd", 0.0, 0.0)],
+                         {"label": "lcd", "x": SAME_PART_MM + 0.1, "y": 0.0}), 0)
+
+    # cap=0 must preserve the old unlimited behaviour exactly.
+    hist2, attempted2 = [], 0
+    for x, y in drift:
+        p = {"label": "lcd", "x": x, "y": y}
+        if 0 and prior_attempts(hist2, p) >= 0:
+            continue
+        hist2.append(("lcd", x, y)); attempted2 += 1
+    check("cap=0 leaves every attempt in place", attempted2, 6)
+
+    # The denominator this is all for: with the cap, that one unit contributes
+    # 2 attempts instead of 6, and the easy set stops being dominated by it.
+    check("easy-set attempts with the cap applied", 29 - 6 + 2, 25)
+
+    # ---- the bench envelope, from layout E2 as it actually ran ------------
+    def pk(lbl, x, y, z):
+        return {"label": lbl, "x": x, "y": y, "z": z}
+
+    e2 = [pk("esp", -104.7, 799.9, 251.4), pk("ultrasonic", -60.0, 560.8, 252.0),
+          pk("lcd", -33.7, 691.6, 249.2), pk("ultrasonic", 70.8, 601.5, 250.6),
+          pk("arduino", 42.5, 815.9, 247.9),
+          pk("lcd", -226.1, 341.0, 64.6)]        # the reproducible phantom
+    check("all five real E2 parts are on the bench",
+          [on_bench(p) for p in e2[:5]], [True] * 5)
+    check("the far-field phantom is not", on_bench(e2[5]), False)
+    # E2 cleared everything: five units, five carried away, nothing left behind.
+    gone, left, moved = clearance(e2, [])
+    check("E2 clearance counts five, not six", (len(gone), len(left)), (5, 0))
+    check("E2 clearance is 100%, not 83%", round(100 * len(gone) / 5), 100)
+    # A part genuinely still on the bench must still be counted against us.
+    gone2, left2, _ = clearance(e2, [pk("arduino", 42.5, 815.9, 247.9)])
+    check("a part that never moved is still counted as left behind",
+          (len(gone2), len(left2)), (4, 1))
+    # The envelope must not quietly swallow a real part at the bench edges.
+    check("a part at the far corner of the bench is kept",
+          on_bench(pk("arduino", -148.6, 845.4, 288.0)), True)
+
+    for f in fails:
+        print("FAIL " + f)
+    if fails:
+        return 1
+    print("clear_scene self-test passed — the per-part cap bounds a retried "
+          "unit at 2 attempts and does not confuse it with its neighbours")
+    return 0
 
 
 if __name__ == "__main__":
+    import sys
+    if "--self-test" in sys.argv:
+        sys.exit(self_test())
     main()
