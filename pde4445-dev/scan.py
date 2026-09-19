@@ -221,7 +221,7 @@ def scan(source=None, conf=CONF, save_as=None):
 def print_picks(picks):
     print(f"\n{len(picks)} parts  —  TOPMOST-FIRST\n")
     print(f"  {'#':>2}  {'label':10} {'conf':>5} {'X(mm)':>8} {'Y(mm)':>8} "
-          f"{'Z(mm)':>7} {'Zmed':>7} {'Zland':>7} {'wid':>6} {'yaw':>7} {'aspect':>7}")
+          f"{'Z(mm)':>7} {'Zmed':>7} {'Zland':>7} {'wid':>6} {'tilt':>6} {'drop':>6} {'yaw':>7} {'aspect':>7}")
     for i, p in enumerate(picks, 1):
         flag = "  <- near-square, yaw ambiguous" if p.get("aspect", 9) < 1.25 else ""
         # z_land ABOVE the part top means a jaw would come down on a neighbour,
@@ -229,9 +229,15 @@ def print_picks(picks):
         zl = p.get("z_land")
         if zl is not None and zl > p["z"] - 2:
             flag += "  <- JAW LANDS ON SOMETHING AT/ABOVE THE PART"
+        # A surface that drops more across the grasp than the jaws can accommodate
+        # gives single-edge contact, and the part pivots out on the lift.
+        d = p.get("tilt_drop_mm")
+        if d is not None and d >= 3.0:
+            flag += f"  <- TILTED, drops {d:.1f}mm across the grasp"
         print(f"  {i:>2}  {p['label']:10} {p['conf']:>5} {p['x']:>8} {p['y']:>8} "
               f"{p['z']:>7} {p.get('z_med','-'):>7} {'-' if zl is None else zl:>7} "
-              f"{p.get('width_mm','-'):>6} {p['yaw']:>7} {p.get('aspect',''):>7}{flag}")
+              f"{p.get('width_mm','-'):>6} {p.get('tilt_deg','-'):>6} "
+              f"{p.get('tilt_drop_mm','-'):>6} {p['yaw']:>7} {p.get('aspect',''):>7}{flag}")
 
 
 def main():

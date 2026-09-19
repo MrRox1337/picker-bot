@@ -25,11 +25,49 @@ def disconnect():
         clientSocket = None
         print("Disconnected.")
 
+def _drain():
+    """Discard any reply left in the socket before issuing a new command.
+
+    WHY THIS MATTERS. Every reply is read with a single blocking recv, so if the
+    buffer ever holds one OK too many - a leftover from a previous script run, or
+    a message that matched more than one If block in the receiver - then from that
+    moment on each recv returns the PREVIOUS command's reply immediately and the PC
+    runs one step ahead of the robot. Observed 8 Sep: the gripper closed while the
+    arm was still descending, and a CAPTURE scan grabbed its frame before the arm
+    had moved, producing a sideways view of the room. Both are the same off-by-one.
+
+    Draining first makes the link self-healing: stale bytes are thrown away, and the
+    reply we then wait for is genuinely the one for the command we just sent.
+    """
+    if clientSocket is None:
+        return
+    clientSocket.setblocking(False)
+    stale = b""
+    try:
+        while True:
+            chunk = clientSocket.recv(1023)
+            if not chunk:
+                break
+            stale += chunk
+    except (BlockingIOError, InterruptedError):
+        pass
+    except OSError:
+        pass
+    finally:
+        clientSocket.setblocking(True)
+    if stale:
+        print(f"--> WARNING: discarded {len(stale)} stale byte(s) before sending: "
+              f"{stale.decode(errors='replace').strip()!r}")
+        print("--> (the PC had drifted ahead of the robot; link re-synchronised)")
+    return stale
+
+
 def _send_command(command, x, y, z, u=0):
     """Centralized helper to format and send TCP/IP commands to EPSON."""
     coordinates = f"{command} {x} {y} {z} {u}\r\n"
     print(f"\n--> Sending: {command} to World Position X={x}, Y={y}, Z={z}, U={u}")
 
+    _drain()                                   # re-sync before every command
     clientSocket.send(coordinates.encode())
 
     confirmation = clientSocket.recv(1023).decode().strip()

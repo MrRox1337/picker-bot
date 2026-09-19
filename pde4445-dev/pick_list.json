@@ -1,0 +1,207 @@
+[
+  {
+    "x": 39.6,
+    "y": 809.8,
+    "z": 264.0,
+    "yaw": 17.5,
+    "u": 783,
+    "v": 536,
+    "ax1": [
+      762,
+      467
+    ],
+    "ax2": [
+      803,
+      605
+    ],
+    "aspect": 1.69,
+    "z_med": 262.0,
+    "width_mm": 35.4,
+    "z_land": 250.4,
+    "land1": [
+      838,
+      519
+    ],
+    "land2": [
+      727,
+      552
+    ],
+    "tilt_deg": 8.9,
+    "tilt_drop_mm": 5.5,
+    "low_dir": [
+      -0.877,
+      0.48
+    ],
+    "label": "esp",
+    "conf": 0.9,
+    "crowding": 0.0,
+    "occlusion": 0.0,
+    "under": [],
+    "under_xy": [],
+    "nudge": null
+  },
+  {
+    "x": -129.4,
+    "y": 673.1,
+    "z": 252.1,
+    "yaw": -41.8,
+    "u": 464,
+    "v": 129,
+    "ax1": [
+      500,
+      90
+    ],
+    "ax2": [
+      428,
+      169
+    ],
+    "aspect": 1.94,
+    "z_med": 250.1,
+    "width_mm": 23.4,
+    "z_land": 246.0,
+    "land1": [
+      491,
+      155
+    ],
+    "land2": [
+      437,
+      104
+    ],
+    "tilt_deg": 7.8,
+    "tilt_drop_mm": 3.2,
+    "low_dir": [
+      0.348,
+      0.937
+    ],
+    "label": "ultrasonic",
+    "conf": 0.972,
+    "crowding": 0.0,
+    "occlusion": 0.0,
+    "under": [],
+    "under_xy": [],
+    "nudge": null
+  },
+  {
+    "x": 64.9,
+    "y": 712.7,
+    "z": 250.4,
+    "yaw": 49.0,
+    "u": 552,
+    "v": 584,
+    "ax1": [
+      483,
+      522
+    ],
+    "ax2": [
+      622,
+      646
+    ],
+    "aspect": 1.11,
+    "z_med": 249.4,
+    "width_mm": 72.9,
+    "z_land": 243.1,
+    "land1": [
+      628,
+      499
+    ],
+    "land2": [
+      476,
+      669
+    ],
+    "tilt_deg": 6.9,
+    "tilt_drop_mm": 8.8,
+    "low_dir": [
+      -0.955,
+      0.296
+    ],
+    "label": "lcd",
+    "conf": 0.972,
+    "crowding": 0.0,
+    "occlusion": 0.0,
+    "under": [],
+    "under_xy": [],
+    "nudge": null
+  },
+  {
+    "x": -124.9,
+    "y": 837.7,
+    "z": 249.2,
+    "yaw": -19.3,
+    "u": 851,
+    "v": 145,
+    "ax1": [
+      884,
+      54
+    ],
+    "ax2": [
+      817,
+      236
+    ],
+    "aspect": 1.46,
+    "z_med": 245.2,
+    "width_mm": 56.6,
+    "z_land": 242.5,
+    "land1": [
+      935,
+      176
+    ],
+    "land2": [
+      766,
+      114
+    ],
+    "tilt_deg": 4.3,
+    "tilt_drop_mm": 4.3,
+    "low_dir": [
+      0.571,
+      0.821
+    ],
+    "label": "arduino",
+    "conf": 0.974,
+    "crowding": 0.0,
+    "occlusion": 0.0,
+    "under": [],
+    "under_xy": [],
+    "nudge": null
+  },
+  {
+    "x": 48.5,
+    "y": 575.4,
+    "z": 248.5,
+    "yaw": -9.5,
+    "u": 239,
+    "v": 540,
+    "ax1": [
+      249,
+      487
+    ],
+    "ax2": [
+      229,
+      593
+    ],
+    "aspect": 1.5,
+    "z_med": 247.5,
+    "width_mm": 31.4,
+    "z_land": 243.3,
+    "land1": [
+      287,
+      548
+    ],
+    "land2": [
+      191,
+      531
+    ],
+    "tilt_deg": 9.6,
+    "tilt_drop_mm": 5.3,
+    "low_dir": [
+      -0.028,
+      1.0
+    ],
+    "label": "ultrasonic",
+    "conf": 0.973,
+    "crowding": 0.0,
+    "occlusion": 0.0,
+    "under": [],
+    "under_xy": [],
+    "nudge": null
+  }
+]
