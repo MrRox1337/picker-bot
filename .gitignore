@@ -1,3 +1,13 @@
 
 # dataset frames / exports (kept local + in Roboflow)
 pde4445-dev/IMG/
+# data capture
+pde4445-dev/captures/
+# gates (.png)
+pde4445-dev/gates/
+# runs (.csv)
+pde4445-dev/runs/
+# scans
+pde4445-dev/scans/
+# vision eval
+pde4445-dev/vision_eval/
